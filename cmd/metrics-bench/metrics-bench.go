@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/niean/go-metrics"
+	"github.com/niean/go-metrics-lite"
 	"time"
 )
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"github.com/niean/go-metrics"
+	"github.com/niean/go-metrics-lite"
 	"log"
 	"math/rand"
 	"os"
