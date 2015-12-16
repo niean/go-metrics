@@ -2,12 +2,10 @@ package main
 
 import (
 	"errors"
-	"github.com/rcrowley/go-metrics"
-	// "github.com/rcrowley/go-metrics/stathat"
+	"github.com/niean/go-metrics"
 	"log"
 	"math/rand"
 	"os"
-	// "syslog"
 	"time"
 )
 
@@ -135,20 +133,4 @@ func main() {
 	go metrics.CaptureRuntimeMemStats(r, 5e9)
 
 	metrics.Log(r, 60e9, log.New(os.Stderr, "metrics: ", log.Lmicroseconds))
-
-	/*
-		w, err := syslog.Dial("unixgram", "/dev/log", syslog.LOG_INFO, "metrics")
-		if nil != err { log.Fatalln(err) }
-		metrics.Syslog(r, 60e9, w)
-	*/
-
-	/*
-		addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:2003")
-		metrics.Graphite(r, 10e9, "metrics", addr)
-	*/
-
-	/*
-		stathat.Stathat(r, 10e9, "example@example.com")
-	*/
-
 }
