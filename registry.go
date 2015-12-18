@@ -44,13 +44,16 @@ type Registry interface {
 
 	// Unregister all metrics.  (Mostly for testing.)
 	UnregisterAll()
+
+	// Get metrics
+	Values() interface{}
 }
 
 // The standard implementation of a Registry is a mutex-protected map
 // of names to metrics.
 type StandardRegistry struct {
 	metrics map[string]interface{}
-	mutex   sync.Mutex
+	mutex   sync.RWMutex
 }
 
 // Create a new registry.
@@ -60,15 +63,18 @@ func NewRegistry() Registry {
 
 // Call the given function for each registered metric.
 func (r *StandardRegistry) Each(f func(string, interface{})) {
-	for name, i := range r.registered() {
+	r.mutex.RLock()
+	cs := r.registered()
+	r.mutex.RUnlock()
+	for name, i := range cs {
 		f(name, i)
 	}
 }
 
 // Get the metric by the given name or nil if none is registered.
 func (r *StandardRegistry) Get(name string) interface{} {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 	return r.metrics[name]
 }
 
@@ -136,8 +142,6 @@ func (r *StandardRegistry) register(name string, i interface{}) error {
 }
 
 func (r *StandardRegistry) registered() map[string]interface{} {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	metrics := make(map[string]interface{}, len(r.metrics))
 	for name, i := range r.metrics {
 		metrics[name] = i
@@ -202,6 +206,10 @@ func (r *PrefixedRegistry) Unregister(name string) {
 // Unregister all metrics.  (Mostly for testing.)
 func (r *PrefixedRegistry) UnregisterAll() {
 	r.underlying.UnregisterAll()
+}
+
+func (r *PrefixedRegistry) Values() interface{} {
+	return r.underlying.Values()
 }
 
 var DefaultRegistry Registry = NewRegistry()
