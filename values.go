@@ -17,6 +17,14 @@ func (r *StandardRegistry) Values() interface{} {
 			if err := metric.Error(); nil != err {
 				values["error"] = metric.Error().Error()
 			}
+		case Meter:
+			m := metric.Snapshot()
+			values["sum.all"] = m.Count()
+			values["rate.1min"] = m.Rate1()
+			values["rate.5min"] = m.Rate5()
+			values["rate.15min"] = m.Rate15()
+			values["rate.all"] = m.RateMean()
+			values["rate.step"] = m.RateStep()
 		case Histogram:
 			h := metric.Snapshot()
 			ps := h.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
@@ -30,13 +38,6 @@ func (r *StandardRegistry) Values() interface{} {
 			values["95th"] = ps[2]
 			values["99th"] = ps[3]
 			values["999th"] = ps[4]
-		case Meter:
-			m := metric.Snapshot()
-			values["count"] = m.Count()
-			values["rate.1min"] = m.Rate1()
-			values["rate.5min"] = m.Rate5()
-			values["rate.15min"] = m.Rate15()
-			values["rate.all"] = m.RateMean()
 		case Timer:
 			t := metric.Snapshot()
 			ps := t.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
@@ -54,6 +55,7 @@ func (r *StandardRegistry) Values() interface{} {
 			values["rate.5min"] = t.Rate5()
 			values["rate.15min"] = t.Rate15()
 			values["rate.all"] = t.RateMean()
+			values["rate.step"] = t.RateStep()
 		}
 		data[name] = values
 	})
