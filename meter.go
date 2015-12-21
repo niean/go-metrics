@@ -150,7 +150,7 @@ func (m *StandardMeter) Mark(n int64) {
 	m.a1.Update(n)
 	m.a5.Update(n)
 	m.a15.Update(n)
-	m.updateSnapshot()
+	m.updateSnapshotOnMark()
 }
 
 // Rate1 returns the one-minute moving average rate of events per second.
@@ -199,13 +199,13 @@ func (m *StandardMeter) Snapshot() Meter {
 	return &snapshot
 }
 
-func (m *StandardMeter) updateSnapshot() {
+func (m *StandardMeter) updateSnapshotOnMark() {
 	// should run with write lock held on m.lock
 	snapshot := m.snapshot
 	snapshot.rate1 = m.a1.Rate()
 	snapshot.rate5 = m.a5.Rate()
 	snapshot.rate15 = m.a15.Rate()
-	snapshot.rateMean = float64(snapshot.count) / time.Since(m.startTime).Seconds()
+	// snapshot.rateMean = float64(snapshot.count) / time.Since(m.startTime).Seconds()
 }
 
 func (m *StandardMeter) updateSnapshotOnTick(last, now time.Time) {
@@ -214,7 +214,9 @@ func (m *StandardMeter) updateSnapshotOnTick(last, now time.Time) {
 	snapshot.rate1 = m.a1.Rate()
 	snapshot.rate5 = m.a5.Rate()
 	snapshot.rate15 = m.a15.Rate()
-	snapshot.rateMean = float64(snapshot.count) / time.Since(m.startTime).Seconds()
+	if sub := now.Sub(m.startTime) / time.Second; sub > 0 {
+		snapshot.rateMean = float64(snapshot.count) / float64(sub)
+	}
 	if sub := now.Sub(last) / time.Second; sub > 0 {
 		snapshot.rateStep = float64(snapshot.count-snapshot._lastCount) / float64(sub)
 	}
