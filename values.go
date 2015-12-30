@@ -19,43 +19,34 @@ func (r *StandardRegistry) Values() interface{} {
 			}
 		case Meter:
 			m := metric.Snapshot()
-			values["sum.all"] = m.Count()
+			values["sum"] = m.Count()
+			values["rate"] = m.RateStep()
 			values["rate.1min"] = m.Rate1()
 			values["rate.5min"] = m.Rate5()
 			values["rate.15min"] = m.Rate15()
-			values["rate.all"] = m.RateMean()
-			values["rate.step"] = m.RateStep()
 		case Histogram:
 			h := metric.Snapshot()
-			ps := h.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
-			values["count"] = h.Count()
+			ps := h.Percentiles([]float64{0.75, 0.95, 0.99})
 			values["min"] = h.Min()
 			values["max"] = h.Max()
 			values["mean"] = h.Mean()
-			values["stddev"] = h.StdDev()
-			values["median"] = ps[0]
-			values["75th"] = ps[1]
-			values["95th"] = ps[2]
-			values["99th"] = ps[3]
-			values["999th"] = ps[4]
+			values["75th"] = ps[0]
+			values["95th"] = ps[1]
+			values["99th"] = ps[2]
 		case Timer:
 			t := metric.Snapshot()
-			ps := t.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
-			values["count"] = t.Count()
+			ps := t.Percentiles([]float64{0.75, 0.95, 0.99})
 			values["min"] = t.Min()
 			values["max"] = t.Max()
 			values["mean"] = t.Mean()
-			values["stddev"] = t.StdDev()
-			values["median"] = ps[0]
-			values["75th"] = ps[1]
-			values["95th"] = ps[2]
-			values["99th"] = ps[3]
-			values["999th"] = ps[4]
+			values["75th"] = ps[0]
+			values["95th"] = ps[1]
+			values["99th"] = ps[2]
+			values["sum"] = t.Count()
+			values["rate"] = t.RateStep()
 			values["rate.1min"] = t.Rate1()
 			values["rate.5min"] = t.Rate5()
 			values["rate.15min"] = t.Rate15()
-			values["rate.all"] = t.RateMean()
-			values["rate.step"] = t.RateStep()
 		}
 		data[name] = values
 	})
